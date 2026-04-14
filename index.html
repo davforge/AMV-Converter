@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>MP4 to AMV Converter</title>
+
+  <style>
+    :root {
+      --bg-top: #f4f5f7;
+      --bg-bottom: #dbe4f4;
+      --card: #ffffff;
+      --text: #0f172a;
+      --muted: #475569;
+      --accent: #0f766e;
+      --accent-strong: #0b5f59;
+      --accent-soft: #d8f1ee;
+      --border: #cbd5e1;
+      --success-bg: #dcfce7;
+      --success-text: #166534;
+      --error-bg: #fee2e2;
+      --error-text: #991b1b;
+      --shadow: 0 22px 60px rgba(15, 23, 42, 0.15);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      display: grid;
+      place-items: center;
+      font-family: "Space Grotesk", "Avenir Next", "Segoe UI", sans-serif;
+      color: var(--text);
+      background:
+        radial-gradient(circle at 12% 14%, #ffffff 0%, transparent 42%),
+        radial-gradient(circle at 88% 84%, #d7f6f2 0%, transparent 38%),
+        linear-gradient(140deg, var(--bg-top), var(--bg-bottom));
+      padding: 24px;
+    }
+
+    .container {
+      width: min(540px, 100%);
+      background: var(--card);
+      border: 1px solid rgba(255, 255, 255, 0.75);
+      border-radius: 24px;
+      box-shadow: var(--shadow);
+      padding: 32px 28px;
+      position: relative;
+      overflow: hidden;
+      animation: fadeIn 380ms ease-out;
+    }
+
+    .container::before {
+      content: "";
+      position: absolute;
+      inset: -30% auto auto -18%;
+      width: 240px;
+      height: 240px;
+      border-radius: 50%;
+      background: radial-gradient(circle, #dbf9f5 0%, rgba(219, 249, 245, 0) 70%);
+      pointer-events: none;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: clamp(1.55rem, 1.5rem + 0.6vw, 1.9rem);
+      letter-spacing: -0.03em;
+    }
+
+    .subtitle {
+      margin: 10px 0 0;
+      color: var(--muted);
+      line-height: 1.45;
+      font-size: 0.96rem;
+      text-wrap: pretty;
+    }
+
+    .field {
+      margin-top: 22px;
+      display: grid;
+      gap: 10px;
+    }
+
+    label {
+      font-size: 0.78rem;
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    input, button {
+      width: 100%;
+      border-radius: 12px;
+      font: inherit;
+      transition: 170ms ease;
+    }
+
+    input[type="file"] {
+      border: 1px solid var(--border);
+      background: #f8fafc;
+      color: var(--text);
+      padding: 11px 12px;
+      cursor: pointer;
+    }
+
+    input[type="file"]:focus-visible {
+      border-color: #0284c7;
+      outline: 3px solid rgba(2, 132, 199, 0.18);
+      outline-offset: 1px;
+    }
+
+    input[type="file"]::file-selector-button {
+      border: none;
+      border-radius: 9px;
+      margin-right: 12px;
+      padding: 9px 12px;
+      font: inherit;
+      font-weight: 700;
+      color: #ffffff;
+      background: linear-gradient(145deg, #0f766e, #0a625c);
+      box-shadow: 0 6px 14px rgba(15, 118, 110, 0.25);
+      cursor: pointer;
+      transition: 170ms ease;
+    }
+
+    input[type="file"]::file-selector-button:hover {
+      filter: brightness(1.06);
+      transform: translateY(-1px);
+    }
+
+    input[type="file"]::file-selector-button:active {
+      transform: translateY(0);
+    }
+
+    button {
+      margin-top: 14px;
+      border: none;
+      padding: 12px 14px;
+      background: var(--accent);
+      color: #ffffff;
+      font-weight: 700;
+      cursor: pointer;
+      box-shadow: 0 9px 20px rgba(15, 118, 110, 0.22);
+    }
+
+    button:hover {
+      background: var(--accent-strong);
+      transform: translateY(-1px);
+    }
+
+    button:active {
+      transform: translateY(0);
+    }
+
+    button:disabled {
+      cursor: progress;
+      opacity: 0.72;
+      transform: none;
+    }
+
+    #status {
+      margin-top: 16px;
+      min-height: 20px;
+      color: var(--muted);
+      font-weight: 500;
+    }
+
+    .progress-wrap {
+      margin-top: 12px;
+      display: none;
+    }
+
+    .progress-meta {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 6px;
+      color: var(--muted);
+      font-size: 0.86rem;
+      font-weight: 600;
+    }
+
+    .progress-track {
+      height: 11px;
+      border-radius: 999px;
+      background: #e2e8f0;
+      overflow: hidden;
+      border: 1px solid #cfd8e4;
+    }
+
+    .progress-fill {
+      height: 100%;
+      width: 0%;
+      border-radius: inherit;
+      background: linear-gradient(90deg, #0f766e, #14b8a6);
+      transition: width 260ms ease;
+    }
+
+    #status.ok,
+    #status.error {
+      padding: 9px 11px;
+      border-radius: 10px;
+      min-height: auto;
+    }
+
+    #status.ok {
+      background: var(--success-bg);
+      color: var(--success-text);
+    }
+
+    #status.error {
+      background: var(--error-bg);
+      color: var(--error-text);
+    }
+
+    #download {
+      margin-top: 14px;
+      display: inline-block;
+      text-decoration: none;
+      background: var(--accent-soft);
+      color: var(--accent-strong);
+      font-weight: 700;
+      padding: 10px 14px;
+      border-radius: 10px;
+      border: 1px solid #9ad9d3;
+    }
+
+    #download:hover {
+      filter: brightness(0.98);
+    }
+
+    @media (max-width: 560px) {
+      .container {
+        padding: 26px 18px;
+        border-radius: 20px;
+      }
+    }
+
+    @keyframes fadeIn {
+      from {
+        opacity: 0;
+        transform: translateY(8px) scale(0.99);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0) scale(1);
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>MP4 → AMV Converter</h2>
+    <p class="subtitle">Upload your MP4 and get a clean AMV download in one click.</p>
+    <div class="field">
+      <label for="fileInput">Choose File</label>
+      <input type="file" id="fileInput" accept="video/mp4" />
+    </div>
+    <button id="convertBtn" onclick="convert()">Convert to AMV</button>
+    <div id="progressWrap" class="progress-wrap" aria-live="polite">
+      <div class="progress-meta">
+        <span id="progressLabel">Preparing...</span>
+        <span id="progressPercent">0%</span>
+      </div>
+      <div class="progress-track" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="0">
+        <div id="progressFill" class="progress-fill"></div>
+      </div>
+    </div>
+    <p id="status"></p>
+    <a id="download" style="display:none;">Download AMV</a>
+  </div>
+
+  <script>
+    const POLL_INTERVAL_MS = 700;
+
+    function sleep(ms) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    function setProgress(percent, label) {
+      const progressWrap = document.getElementById('progressWrap');
+      const progressFill = document.getElementById('progressFill');
+      const progressPercent = document.getElementById('progressPercent');
+      const progressLabel = document.getElementById('progressLabel');
+      const progressTrack = progressWrap.querySelector('.progress-track');
+      const safePercent = Math.max(0, Math.min(100, Math.round(Number(percent) || 0)));
+
+      progressWrap.style.display = 'block';
+      progressFill.style.width = `${safePercent}%`;
+      progressPercent.innerText = `${safePercent}%`;
+      progressTrack.setAttribute('aria-valuenow', String(safePercent));
+      if (label) progressLabel.innerText = label;
+    }
+
+    async function pollJobUntilDone(jobId) {
+      while (true) {
+        const statusResponse = await fetch(`/convert/status/${jobId}`);
+        if (!statusResponse.ok) {
+          throw new Error('Could not read conversion progress.');
+        }
+
+        const payload = await statusResponse.json();
+        setProgress(payload.progress, payload.message || 'Converting...');
+
+        if (payload.status === 'completed') {
+          return payload;
+        }
+        if (payload.status === 'error') {
+          throw new Error(payload.error || 'Conversion failed');
+        }
+
+        await sleep(POLL_INTERVAL_MS);
+      }
+    }
+
+    async function convert() {
+      const fileInput = document.getElementById('fileInput');
+      const status = document.getElementById('status');
+      const download = document.getElementById('download');
+      const convertBtn = document.getElementById('convertBtn');
+      const progressWrap = document.getElementById('progressWrap');
+
+      status.className = '';
+      status.innerText = '';
+      download.style.display = 'none';
+      progressWrap.style.display = 'none';
+
+      if (!fileInput.files.length) {
+        status.innerText = "Please upload an MP4 file.";
+        status.className = 'error';
+        return;
+      }
+
+      const file = fileInput.files[0];
+
+      try {
+        status.innerText = "Uploading...";
+        convertBtn.disabled = true;
+        setProgress(0, 'Uploading file...');
+
+        const formData = new FormData();
+        formData.append('video', file);
+
+        const response = await fetch('/convert/start', {
+          method: 'POST',
+          body: formData
+        });
+
+        if (!response.ok) {
+          const message = await response.text();
+          throw new Error(message || "Server error during conversion");
+        }
+
+        const { jobId } = await response.json();
+        if (!jobId) {
+          throw new Error('Server did not return a conversion job id.');
+        }
+
+        setProgress(3, 'Upload complete. Starting conversion...');
+        status.innerText = "Converting...";
+        const result = await pollJobUntilDone(jobId);
+
+        download.href = result.downloadUrl;
+        download.style.display = 'block';
+        download.innerText = 'Download AMV File';
+
+        status.innerText = "Conversion complete.";
+        status.className = 'ok';
+
+      } catch (err) {
+        console.error(err);
+        status.innerText = "Error: " + err.message;
+        status.className = 'error';
+      } finally {
+        convertBtn.disabled = false;
+      }
+    }
+  </script>
+</body>
+</html>
