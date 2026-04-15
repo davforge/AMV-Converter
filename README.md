@@ -9,8 +9,12 @@ What Is the Point of This Converter?
 
 # Steps to get you up and running:
 
-First, download the ZIP file and unzip it. Open the folder in your favorite IDE—VS Code works great. Next, make a new folder called uploads right in the root directory. Don’t forget: it has to be named exactly uploads with the same capitalization.
+First, download the ZIP file and unzip it.
+Open the folder in your favorite IDE—VS Code works great. 
+Next, make a new folder called uploads right in the root directory.
+Don’t forget: it has to be named exactly uploads with the same capitalization.
 
 Now, open your terminal, and before you do anything else, run npm install if you haven’t before. This grabs all the dependencies you need. Once that’s done, type npm start. You’ll get a message letting you know the server’s up on port 3000.
 
-Finally, open your browser and head to http://localhost:3000. That’s it—you’re ready to go.
+Finally, open your browser and head to http://localhost:3000. 
+That’s it—you’re ready to go.
